@@ -37,6 +37,11 @@ export class DisputeResolver {
       errors.push(`Comitê deve ter exatamente ${DISPUTE_CONSTANTS.COMMITTEE_SIZE} membros`);
     }
 
+    // Validar committeeMemberIds (deve ter exatamente 3 membros)
+    if (!input.committeeMemberIds || input.committeeMemberIds.length !== DISPUTE_CONSTANTS.COMMITTEE_SIZE) {
+      errors.push(`committeeMemberIds deve ter exatamente ${DISPUTE_CONSTANTS.COMMITTEE_SIZE} IDs`);
+    }
+
     // Verificar roles duplicadas
     const uniqueRoles = new Set(input.committeeRoles);
     if (uniqueRoles.size !== input.committeeRoles.length) {
@@ -80,6 +85,7 @@ export class DisputeResolver {
       prUrl: input.prUrl,
       status: 'pending',
       committeeRoles: [...input.committeeRoles],
+      committeeMemberIds: [...input.committeeMemberIds],
       votes: [],
       reason: input.reason.trim(),
       createdAt: now,
@@ -96,7 +102,7 @@ export class DisputeResolver {
    */
   addVote(
     dispute: Dispute,
-    vote: { role: CommitteeRole; choice: VoteChoice; justification: string },
+    vote: { voterId: string; role: CommitteeRole; choice: VoteChoice; justification: string },
     context: DisputeContext
   ): { dispute: Dispute | null; errors: string[] } {
     const errors: string[] = [];
@@ -107,16 +113,22 @@ export class DisputeResolver {
       return { dispute: null, errors };
     }
 
-    // Validar se o votante faz parte do comitê
-    if (!dispute.committeeRoles.includes(vote.role)) {
-      errors.push(`Role '${vote.role}' não faz parte do comitê desta disputa`);
+    // Validar se o votante faz parte do comitê (ANTES do conflito de interesse)
+    if (!dispute.committeeMemberIds.includes(vote.voterId)) {
+      errors.push(`INVALID_VOTER: voterId '${vote.voterId}' não faz parte do comitê desta disputa`);
       return { dispute: null, errors };
     }
 
-    // Validar conflito de interesse (usuário atual não pode votar se já votou)
-    const existingVote = dispute.votes.find((v) => v.role === vote.role);
+    // Validar conflito de interesse (votante não pode ser challenger ou challenged)
+    if (vote.voterId === context.challengerId || vote.voterId === context.challengedId) {
+      errors.push(`CONFLICT_OF_INTEREST: voterId '${vote.voterId}' é parte interessada na disputa`);
+      return { dispute: null, errors };
+    }
+
+    // Validar duplicidade (mesmo voterId já votou)
+    const existingVote = dispute.votes.find((v) => v.voterId === vote.voterId);
     if (existingVote) {
-      errors.push(`Role '${vote.role}' já votou nesta disputa`);
+      errors.push(`Voto duplicado: voterId '${vote.voterId}' já votou nesta disputa`);
       return { dispute: null, errors };
     }
 
@@ -128,6 +140,7 @@ export class DisputeResolver {
 
     // Criar novo voto
     const newVote: DisputeVote = {
+      voterId: vote.voterId,
       role: vote.role,
       choice: vote.choice,
       justification: vote.justification.trim(),

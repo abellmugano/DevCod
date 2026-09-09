@@ -7,6 +7,7 @@ export type CommitteeRole = 'platform' | 'external_maintainer' | 'community_lanc
 export type VoteChoice = 'approve' | 'reject';
 
 export interface DisputeVote {
+  voterId: string; // ID do membro que votou
   role: CommitteeRole;
   choice: VoteChoice;
   justification: string;
@@ -14,7 +15,8 @@ export interface DisputeVote {
 }
 
 export interface DisputeContext {
-  currentUserRole?: CommitteeRole;
+  challengerId: string; // ID do desafiante
+  challengedId: string; // ID do desafiado
   now: Date;
 }
 
@@ -22,6 +24,7 @@ export interface DisputeInput {
   prUrl: string;
   deadlineDays: number;
   committeeRoles: CommitteeRole[];
+  committeeMemberIds: string[]; // IDs dos membros do comitê
   reason: string;
 }
 
@@ -30,6 +33,7 @@ export interface Dispute {
   prUrl: string;
   status: DisputeStatus;
   committeeRoles: CommitteeRole[];
+  committeeMemberIds: string[]; // IDs dos membros do comitê
   votes: DisputeVote[];
   reason: string;
   createdAt: Date;

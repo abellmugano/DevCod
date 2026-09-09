@@ -45,7 +45,7 @@ describe('DisputeResolver', () => {
     expect(dispute!.status).toBe('pending');
   });
 
-  it('deve resolver com approve ao atingir 2 votos', () => {
+  it('deve resolver com approve ao atingir 2 votos (encadeando imutabilidade)', () => {
     const { dispute: created } = resolver.create(validInput);
     const ctx = { challengerId: validInput.challengerId, challengedId: validInput.challengedId };
     const v1: DisputeVote = { voterId: 'platform-1', role: 'platform', option: 'approve', justification: 'A'.repeat(50), votedAt: '2026-09-02T10:00:00Z' };
@@ -57,12 +57,12 @@ describe('DisputeResolver', () => {
     expect(r2.dispute!.decision).toBe('approve');
   });
 
-  it('deve rejeitar voto duplicado', () => {
+  it('deve rejeitar voto duplicado (encadeando imutabilidade)', () => {
     const { dispute: created } = resolver.create(validInput);
     const ctx = { challengerId: validInput.challengerId, challengedId: validInput.challengedId };
     const v: DisputeVote = { voterId: 'platform-1', role: 'platform', option: 'approve', justification: 'A'.repeat(50), votedAt: '2026-09-02T10:00:00Z' };
-    resolver.addVote(created!, v, ctx);
-    const r2 = resolver.addVote(created!, v, ctx);
+    const r1 = resolver.addVote(created!, v, ctx);
+    const r2 = resolver.addVote(r1.dispute!, v, ctx);
     expect(r2.success).toBe(false);
     expect(r2.error!.code).toBe('DUPLICATE_VOTE');
   });
@@ -76,10 +76,15 @@ describe('DisputeResolver', () => {
     expect(r.error!.code).toBe('INVALID_VOTER');
   });
 
-  it('deve rejeitar conflito de interesse', () => {
-    const { dispute: created } = resolver.create(validInput);
-    const ctx = { challengerId: validInput.challengerId, challengedId: validInput.challengedId };
-    const v: DisputeVote = { voterId: validInput.challengerId, role: 'platform', option: 'approve', justification: 'A'.repeat(50), votedAt: '2026-09-02T10:00:00Z' };
+  it('deve rejeitar conflito de interesse (membro do comitê = challenger)', () => {
+    // Cenário: criamos uma disputa onde o challenger É um membro do comitê
+    const inputComConflito: DisputeInput = {
+      ...validInput,
+      challengerId: 'platform-1', // challenger é membro do comitê (cenário inválido)
+    };
+    const { dispute: created } = resolver.create(inputComConflito);
+    const ctx = { challengerId: 'platform-1', challengedId: validInput.challengedId };
+    const v: DisputeVote = { voterId: 'platform-1', role: 'platform', option: 'approve', justification: 'A'.repeat(50), votedAt: '2026-09-02T10:00:00Z' };
     const r = resolver.addVote(created!, v, ctx);
     expect(r.success).toBe(false);
     expect(r.error!.code).toBe('CONFLICT_OF_INTEREST');

@@ -13,8 +13,8 @@ serve(async (req) => {
 
     // 1. Validar HMAC
     const vcsAdapter = createVCSAdapter();
-    const isValid = vcsAdapter.validateWebhook(
-      Buffer.from(payload),
+    const isValid = await vcsAdapter.validateWebhook(
+      new Uint8Array(payload),
       signature,
       webhookSecret
     );

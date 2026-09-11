@@ -1,114 +1,37 @@
-import Stripe from "stripe";
-
-export interface StripeConfig {
-  stripeSecretKey: string;
-  platformFeePercentage: number;
-}
-
-export interface Payout {
-  payoutId: string;
-  paymentIntentId: string;
-  recipientId: string;
-  amount: number;
-  status: string;
-  createdAt: string;
-}
+import Stripe from "https://esm.sh/stripe@16?target=deno";
 
 export class StripeAdapter {
   private stripe: Stripe;
-  private platformFeePercentage: number;
+  private fee: number;
 
-  constructor(config: StripeConfig) {
-    this.stripe = new Stripe(config.stripeSecretKey, {
-      apiVersion: "2024-09-30.acacia" as any,
-    });
-    this.platformFeePercentage = config.platformFeePercentage;
+  constructor(cfg: { stripeSecretKey: string; platformFeePercentage: number }) {
+    this.stripe = new Stripe(cfg.stripeSecretKey, { apiVersion: "2024-09-30.acacia" as any });
+    this.fee = cfg.platformFeePercentage;
   }
 
-  async createEscrowPayment(
-    challengeId: string,
-    projectId: string,
-    amount: number,
-    sourceToken: string
-  ): Promise<any> {
-    const platformFee = Math.round(amount * this.platformFeePercentage);
-    const paymentIntent = await this.stripe.paymentIntents.create({
-      amount,
-      currency: "brl",
-      payment_method: sourceToken,
-      confirm: true,
-      transfer_group: challengeId,
-      metadata: { challengeId, projectId, platformFee: String(platformFee) },
-    });
-    return {
-      paymentIntentId: paymentIntent.id,
-      challengeId,
-      amount,
-      platformFee,
-      status: "pending",
-    };
+  async holdPayment(_paymentIntentId: string): Promise<void> {
+    // MVP: no-op. Em produção, usar manual capture.
   }
 
   async releaseEscrowPayment(
     paymentIntentId: string,
-    lancerAccountId: string,
+    stripeAccountId: string,
     score: number,
     maxScore: number
-  ): Promise<Payout> {
-    const paymentIntent =
-      await this.stripe.paymentIntents.retrieve(paymentIntentId);
-    const releaseAmount = Math.round(
-      (paymentIntent.amount * score) / maxScore
-    );
-    const platformFee = Math.round(
-      releaseAmount * this.platformFeePercentage
-    );
-    const lancerPayout = releaseAmount - platformFee;
-
-    if (lancerPayout <= 0) {
-      return {
-        payoutId: "zero-payout",
-        paymentIntentId,
-        recipientId: lancerAccountId,
-        amount: 0,
-        status: "paid",
-        createdAt: new Date().toISOString(),
-      };
-    }
+  ): Promise<{ payoutId: string; amount: number; platformFee: number }> {
+    const pi = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+    const releaseAmount = Math.round((pi.amount * score) / maxScore);
+    const platformFee = Math.round(releaseAmount * this.fee);
+    const payout = releaseAmount - platformFee;
 
     const transfer = await this.stripe.transfers.create({
-      amount: lancerPayout,
+      amount: payout,
       currency: "brl",
-      destination: lancerAccountId,
-      transfer_group: paymentIntent.metadata.challengeId,
-      metadata: { score: String(score), platformFee: String(platformFee) },
+      destination: stripeAccountId,
+      transfer_group: paymentIntentId,
+      metadata: { score: score.toString(), platformFee: platformFee.toString() },
     });
 
-    return {
-      payoutId: transfer.id,
-      paymentIntentId,
-      recipientId: lancerAccountId,
-      amount: lancerPayout,
-      status: "paid",
-      createdAt: new Date().toISOString(),
-    };
-  }
-
-  async holdPayment(paymentIntentId: string): Promise<void> {
-    await this.stripe.paymentIntents.update(paymentIntentId, {
-      metadata: { held: "true" },
-    });
-  }
-
-  async releaseHeldPayment(paymentIntentId: string): Promise<Payout> {
-    const pi = await this.stripe.paymentIntents.retrieve(paymentIntentId);
-    return {
-      payoutId: "released-" + paymentIntentId,
-      paymentIntentId,
-      recipientId: pi.metadata.lancerAccountId || "",
-      amount: pi.amount,
-      status: "paid",
-      createdAt: new Date().toISOString(),
-    };
+    return { payoutId: transfer.id, amount: payout, platformFee };
   }
 }

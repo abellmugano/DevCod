@@ -1,83 +1,101 @@
-import { VCSAdapter, PRData, MetricsData } from '../../core/ports/vcs';
-import { GitHubConfig, AdapterResult, PullRequestIdentifier } from './types';
-import * as crypto from 'crypto';
+export interface PRData {
+  id: string;
+  url: string;
+  authorId: string;
+  state: "open" | "closed" | "merged";
+  createdAt: string;
+  mergedAt: string | null;
+}
+
+export interface MetricsData {
+  domainFilesChanged: number;
+  cyclomaticComplexityDelta: number;
+  assertionsAdded: number;
+  diffCoverage: number;
+  lintPassed: boolean;
+}
+
+export interface GitHubConfig {
+  token: string;
+  webhookSecret: string;
+}
 
 const PR_URL_REGEX = /^https:\/\/github\.com\/([\w-]+)\/([\w-]+)\/pull\/(\d+)\/?$/i;
 
-/**
- * Adaptador GitHub (Porta do Core → API GitHub v3).
- * Implementa VCSAdapter com retry, rate limiting e HMAC-SHA256.
- */
-export class GitHubAdapter implements VCSAdapter {
-  private readonly config: Required<GitHubConfig>;
+export class GitHubAdapter {
+  private config: GitHubConfig;
+  constructor(config: GitHubConfig) { this.config = config; }
 
-  constructor(config: GitHubConfig) {
-    this.config = {
-      token: config.token,
-      webhookSecret: config.webhookSecret,
-      timeoutMs: config.timeoutMs ?? 10000,
-      maxRetries: config.maxRetries ?? 3,
-      baseUrl: config.baseUrl ?? 'https://api.github.com',
-    };
-  }
+  async getPullRequest(prUrl: string): Promise<PRData> {
+    const parsed = GitHubAdapter.parsePRUrl(prUrl);
+    if (!parsed.success) throw new Error(parsed.error.message);
+    const { owner, repo, prNumber } = parsed.data;
 
-  async getPullRequest(prUrl: string): Promise<AdapterResult<PRData>> {
-    const parseResult = GitHubAdapter.parsePRUrl(prUrl);
-    if (!parseResult.success) return parseResult;
-    throw new Error('Not implemented - use Edge Function');
-  }
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`, {
+      headers: { Authorization: `Bearer ${this.config.token}`, Accept: "application/vnd.github+json" },
+    });
+    if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+    const pr = await res.json();
 
-  async getMetrics(prUrl: string): Promise<AdapterResult<MetricsData | null>> {
-    const parseResult = GitHubAdapter.parsePRUrl(prUrl);
-    if (!parseResult.success) return parseResult;
-    throw new Error('Not implemented - use Edge Function');
-  }
-
-  validateWebhook(
-    payload: Buffer,
-    signatureHeader: string,
-    secret: string
-  ): boolean {
-    if (typeof signatureHeader !== 'string' || !signatureHeader.startsWith('sha256=')) {
-      return false;
-    }
-    const receivedSignature = signatureHeader.substring(7);
-    if (!/^[a-f0-9]{64}$/i.test(receivedSignature)) {
-      return false;
-    }
-    const hmac = crypto.createHmac('sha256', secret);
-    hmac.update(payload);
-    const expectedSignature = hmac.digest('hex');
-    if (receivedSignature.length !== expectedSignature.length) {
-      return false;
-    }
-    return crypto.timingSafeEqual(
-      Buffer.from(receivedSignature, 'hex'),
-      Buffer.from(expectedSignature, 'hex')
-    );
-  }
-
-  static parsePRUrl(prUrl: string): AdapterResult<PullRequestIdentifier> {
-    if (typeof prUrl !== 'string') {
-      return {
-        success: false,
-        error: { code: 'INVALID_PR_URL', message: 'URL deve ser string', retryable: false },
-      };
-    }
-    const match = prUrl.match(PR_URL_REGEX);
-    if (!match) {
-      return {
-        success: false,
-        error: { code: 'INVALID_PR_URL', message: 'URL fora do padrão GitHub PR', retryable: false },
-      };
-    }
     return {
-      success: true,
-      data: {
-        owner: match[1],
-        repo: match[2],
-        prNumber: parseInt(match[3], 10),
-      },
+      id: pr.id.toString(),
+      url: pr.html_url,
+      authorId: pr.user.id.toString(),
+      state: pr.merged ? "merged" : pr.state,
+      createdAt: pr.created_at,
+      mergedAt: pr.merged_at,
     };
+  }
+
+  async getMetrics(prUrl: string): Promise<MetricsData | null> {
+    const parsed = GitHubAdapter.parsePRUrl(prUrl);
+    if (!parsed.success) return null;
+    const { owner, repo, prNumber } = parsed.data;
+
+    const prRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`, {
+      headers: { Authorization: `Bearer ${this.config.token}`, Accept: "application/vnd.github+json" },
+    });
+    if (!prRes.ok) return null;
+    const pr = await prRes.json();
+
+    const metricsRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/metrics.json?ref=${pr.head.ref}`,
+      { headers: { Authorization: `Bearer ${this.config.token}`, Accept: "application/vnd.github.raw+json" } }
+    );
+    if (!metricsRes.ok) return null;
+
+    try {
+      const m = JSON.parse(await metricsRes.text());
+      return {
+        domainFilesChanged: m.domainFilesChanged || 0,
+        cyclomaticComplexityDelta: m.cyclomaticComplexityDelta || 0,
+        assertionsAdded: m.assertionsAdded || 0,
+        diffCoverage: m.diffCoverage || 0,
+        lintPassed: m.lintPassed || false,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // ✅ CORRIGIDO: agora é async e retorna Promise<boolean>
+  async validateWebhook(payload: Uint8Array, signatureHeader: string, secret: string): Promise<boolean> {
+    if (!signatureHeader.startsWith("sha256=")) return false;
+    const received = signatureHeader.substring(7);
+    if (!/^[a-f0-9]{64}$/i.test(received)) return false;
+
+    const key = await crypto.subtle.importKey(
+      "raw", new TextEncoder().encode(secret),
+      { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+    );
+    const sig = await crypto.subtle.sign("HMAC", key, payload);
+    const expected = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("");
+    return received === expected;
+  }
+
+  static parsePRUrl(prUrl: string): { success: boolean; data?: { owner: string; repo: string; prNumber: number }; error?: { code: string; message: string } } {
+    const match = prUrl.match(PR_URL_REGEX);
+    if (!match) return { success: false, error: { code: "INVALID_PR_URL", message: "URL fora do padrão GitHub PR" } };
+    return { success: true, data: { owner: match[1], repo: match[2], prNumber: parseInt(match[3], 10) } };
   }
 }

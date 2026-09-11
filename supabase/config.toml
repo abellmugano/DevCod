@@ -1,0 +1,20 @@
+[project]
+name = "DevCod"
+
+[functions.process-webhook]
+verify_jwt = false
+
+[functions.calculate-score]
+verify_jwt = true
+
+[functions.release-payment]
+verify_jwt = true
+
+[functions.resolve-dispute]
+verify_jwt = true
+
+[functions.verify-event-log]
+verify_jwt = true
+
+[functions.award-devcoins]
+verify_jwt = true

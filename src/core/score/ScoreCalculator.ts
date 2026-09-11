@@ -1,4 +1,4 @@
-import { ScoreInput, ScoreResult, ScoreCalculationError, ScoreBreakdown } from './types';
+import { ScoreInput, ScoreResult, ScoreCalculationError, ScoreBreakdown } from './types.ts';
 
 export const ALGORITHM_VERSION = 'score_v1';
 export const AUTO_WEIGHT = 0.6;

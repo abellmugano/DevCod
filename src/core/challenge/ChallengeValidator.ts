@@ -1,4 +1,4 @@
-import { ChallengeInput, ValidationResult, ValidationError, ErrorCode } from './types';
+import { ChallengeInput, ValidationResult, ValidationError, ErrorCode } from './types.ts';
 
 export class ChallengeValidator {
   validate(input: ChallengeInput): ValidationResult {

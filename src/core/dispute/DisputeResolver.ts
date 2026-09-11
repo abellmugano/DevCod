@@ -1,4 +1,4 @@
-import { DisputeInput, DisputeVote, DisputeResult, VoteOption, Dispute, DisputeError } from './types';
+import { DisputeInput, DisputeVote, DisputeResult, VoteOption, Dispute, DisputeError } from './types.ts';
 
 export const DISPUTE_CONSTANTS = {
   QUORUM_REQUIRED: 2,

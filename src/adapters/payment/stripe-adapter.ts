@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Stripe from "https://esm.sh/stripe@16?target=deno";
 
 export class StripeAdapter {

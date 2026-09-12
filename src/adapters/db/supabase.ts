@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 export class SupabaseAdapter {

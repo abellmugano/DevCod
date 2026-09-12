@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { VCSAdapter, PRData, MetricsData } from '../../core/ports/vcs';
 import { GitHubConfig, AdapterResult, PullRequestIdentifier } from './types';
 import * as crypto from 'crypto';

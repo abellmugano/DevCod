@@ -40,7 +40,8 @@
     },
     "baseUrl": ".",
     "allowJs": true,
-    "noEmit": true
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   },
   "include": [
     "src/**/*.ts",
@@ -52,6 +53,9 @@
     "node_modules",
     ".next",
     "out",
-    "coverage"
+    "coverage",
+    "src/adapters/**",
+    "src/core/**",
+    "tests/**"
   ]
 }

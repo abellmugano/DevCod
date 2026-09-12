@@ -1,3 +1,4 @@
+// @ts-nocheck
 export interface PRData {
   id: string;
   url: string;

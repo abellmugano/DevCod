@@ -40,3 +40,6 @@ metrics.json
 .env.local
 .env*.local
 
+
+*.bak
+*.bak2

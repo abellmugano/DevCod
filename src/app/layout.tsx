@@ -27,13 +27,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${jetbrains.variable}`}>
-      <head>
-        {/* Material Symbols — necessário para os ícones do design */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        />
-      </head>
       <body className="bg-background text-on-surface font-body-md antialiased">
         {children}
       </body>

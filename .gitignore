@@ -43,3 +43,6 @@ metrics.json
 
 *.bak
 *.bak2
+
+/DevCod-test/
+/tmp-*/

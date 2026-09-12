@@ -1,35 +1,47 @@
 import Link from "next/link";
+import { IconGitHub } from "./icons";
 
 export function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur border-b border-gray-200 dark:border-gray-800">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-        <Link href="/" className="text-xl font-bold">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-800/60">
+      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3.5">
+        <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
+          <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-blue-600 text-white text-sm font-bold">
+            D
+          </span>
           DevCod
         </Link>
-        <div className="hidden md:flex items-center gap-6">
-          <Link href="/projects" className="text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white">
-            Projetos
+
+        <div className="hidden md:flex items-center gap-8">
+          <Link href="/#como-funciona" className="text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors">
+            Como funciona
           </Link>
-          <Link href="/audit" className="text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white">
-            Auditoria
+          <Link href="/#impact-score" className="text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors">
+            Impact Score
           </Link>
-          <Link href="/about" className="text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white">
-            Sobre
+          <Link href="/#diferenciais" className="text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors">
+            Diferenciais
           </Link>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <a
+            href="https://github.com/abellmugano/DevCod"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:inline-flex items-center gap-2 text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors"
+            aria-label="Ver no GitHub"
+          >
+            <IconGitHub className="w-4 h-4" />
+            GitHub
+          </a>
           <Link
             href="/waitlist"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white font-medium hover:bg-blue-700 transition"
+            className="rounded-lg bg-gray-900 dark:bg-white text-white dark:text-black px-4 py-2 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
           >
             Entrar na lista
           </Link>
         </div>
-        <Link
-          href="/waitlist"
-          className="md:hidden rounded-lg bg-blue-600 px-3 py-2 text-sm text-white font-medium"
-        >
-          Entrar
-        </Link>
       </div>
     </nav>
   );

@@ -55,7 +55,7 @@ export function Footer() {
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-            Todos os sistemas operacionais
+            Infraestrutura validada · Gate 4.9
           </div>
         </div>
       </div>

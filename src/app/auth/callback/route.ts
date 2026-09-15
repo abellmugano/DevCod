@@ -1,0 +1,24 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
+  const nextParam = searchParams.get("next");
+  const next = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//")
+    ? nextParam
+    : "/dashboard";
+
+  if (!code) {
+    return NextResponse.redirect(`${origin}/auth/signin?error=missing_code`);
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    return NextResponse.redirect(`${origin}/auth/signin?error=exchange_failed`);
+  }
+
+  return NextResponse.redirect(`${origin}${next}`);
+}

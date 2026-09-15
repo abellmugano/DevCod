@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthButton } from "./AuthButton";
 import { IconGitHub } from "./icons";
 
 export function Navbar() {
@@ -35,12 +36,7 @@ export function Navbar() {
             <IconGitHub className="w-4 h-4" />
             GitHub
           </a>
-          <Link
-            href="/waitlist"
-            className="rounded-lg bg-gray-900 dark:bg-white text-white dark:text-black px-4 py-2 text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
-          >
-            Entrar na lista
-          </Link>
+          <AuthButton />
         </div>
       </div>
     </nav>

@@ -33,12 +33,12 @@ export function AuthButton() {
   if (user) {
     return (
       <div className="flex items-center gap-3">
-        <a href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">
+        <a href="/dashboard" className="font-mono text-[11px] uppercase tracking-[0.12em] text-slate-300 transition-colors hover:text-white">
           Dashboard
         </a>
         <button
           onClick={handleLogout}
-          className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+          className="font-mono text-[11px] uppercase tracking-[0.12em] text-slate-300 transition-colors hover:text-white"
           type="button"
         >
           Sair
@@ -50,7 +50,7 @@ export function AuthButton() {
   return (
     <a
       href="/auth/signin"
-      className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 transition-colors"
+      className="border border-[#b6ff45] bg-[#b6ff45] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#070908] transition-colors hover:border-white hover:bg-white"
     >
       Entrar com GitHub
     </a>

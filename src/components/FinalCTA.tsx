@@ -1,22 +1,3 @@
-import { WaitlistForm } from "./WaitlistForm";
-
-export function FinalCTA() {
-  return (
-    <section className="py-20 md:py-28 bg-gray-50 dark:bg-gray-950">
-      <div className="max-w-3xl mx-auto px-6 text-center">
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
-          Pronto para começar?
-        </h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 mb-10">
-          Entre na lista e seja avisado quando os primeiros desafios abrirem.
-        </p>
-        <div className="flex justify-center">
-          <WaitlistForm compact />
-        </div>
-        <p className="mt-6 text-xs text-gray-500">
-          Sem spam. Apenas o anúncio de lançamento.
-        </p>
-      </div>
-    </section>
-  );
-}
+import Link from "next/link";
+import { IconArrowRight } from "./icons";
+export function FinalCTA() { return <section className="border-b border-white/10 py-24 lg:py-32"><div className="mx-auto max-w-7xl px-5 lg:px-8"><div className="flex flex-col justify-between gap-10 border border-[#b6ff45]/40 bg-[#101610] p-8 md:p-12 lg:flex-row lg:items-end"><div><p className="eyebrow text-[#b6ff45]">06 / NEXT STEP</p><h2 className="mt-6 max-w-2xl text-4xl font-medium tracking-[-.04em] text-white sm:text-6xl">Torne o trabalho técnico verificável.</h2></div><Link href="https://github.com/abellmugano/DevCod" target="_blank" className="inline-flex shrink-0 items-center justify-center gap-3 bg-[#b6ff45] px-5 py-3 font-mono text-xs font-bold uppercase tracking-[.12em] text-[#070908] transition hover:bg-white">Explorar o DevCod <IconArrowRight className="h-4 w-4" /></Link></div></div></section>; }

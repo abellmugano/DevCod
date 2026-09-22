@@ -2,17 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-::selection {
-  background-color: #004ac6;
-  color: #ffffff;
+:root { color-scheme: dark; }
+html { scroll-behavior: smooth; }
+body { background: #070908; color: #f8fafc; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+::selection { background: #b6ff45; color: #070908; }
+:focus-visible { outline: 2px solid #b6ff45; outline-offset: 4px; }
+@layer components {
+  .eyebrow { @apply font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500; }
+  .section-title { @apply mt-4 text-4xl font-medium leading-[1.05] tracking-[-0.04em] text-white sm:text-6xl; }
 }

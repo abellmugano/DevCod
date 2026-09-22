@@ -1,43 +1,20 @@
 import Link from "next/link";
 import { AuthButton } from "./AuthButton";
-import { IconGitHub } from "./icons";
 
 export function Navbar() {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200/60 dark:border-gray-800/60">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3.5">
-        <Link href="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
-          <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-blue-600 text-white text-sm font-bold">
-            D
-          </span>
-          DevCod
+    <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#070908]/90 backdrop-blur" aria-label="Navegação principal">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
+        <Link href="/" className="flex items-center gap-3" aria-label="DevCod, início">
+          <span className="flex h-8 w-8 items-center justify-center border border-[#b6ff45] font-mono text-sm font-bold text-[#b6ff45]">D_</span>
+          <span className="text-lg font-semibold tracking-tight text-white">DevCod<span className="text-[#b6ff45]">.</span></span>
         </Link>
-
-        <div className="hidden md:flex items-center gap-8">
-          <Link href="/#como-funciona" className="text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors">
-            Como funciona
-          </Link>
-          <Link href="/#impact-score" className="text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors">
-            Impact Score
-          </Link>
-          <Link href="/#diferenciais" className="text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors">
-            Diferenciais
-          </Link>
+        <div className="hidden items-center gap-8 md:flex">
+          <Link href="/#como-funciona" className="font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400 transition hover:text-white">Como funciona</Link>
+          <Link href="/#verificacao" className="font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400 transition hover:text-white">Verificação</Link>
+          <Link href="/#para-quem" className="font-mono text-[11px] uppercase tracking-[0.16em] text-slate-400 transition hover:text-white">Para quem</Link>
         </div>
-
-        <div className="flex items-center gap-3">
-          <a
-            href="https://github.com/abellmugano/DevCod"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-2 text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors"
-            aria-label="Ver no GitHub"
-          >
-            <IconGitHub className="w-4 h-4" />
-            GitHub
-          </a>
-          <AuthButton />
-        </div>
+        <AuthButton />
       </div>
     </nav>
   );

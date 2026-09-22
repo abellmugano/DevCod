@@ -15,9 +15,9 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DevCod — Onde código aberto encontra recompensa justa",
+  title: "DevCod — Verificação de trabalho técnico",
   description:
-    "Plataforma freelancer open source com auditoria forense e Impact Score auditável.",
+    "Infraestrutura experimental para transformar trabalho técnico em evidência, validação e reputação baseada em confiança verificável.",
 };
 
 export default function RootLayout({
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${jetbrains.variable}`}>
+    <html lang="pt-PT" className={`${inter.variable} ${jetbrains.variable}`}>
       <body className="bg-background text-on-surface font-body-md antialiased">
         {children}
       </body>

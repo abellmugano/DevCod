@@ -25,7 +25,7 @@ export function ImpactScore() {
             </p>
 
             <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 p-6 font-mono text-sm">
-              <div className="text-gray-500 mb-2">// score_v1</div>
+              <div className="text-gray-500 mb-2">{"// score_v1"}</div>
               <div className="text-blue-600 dark:text-blue-400">
                 score = (complexidade × 0.35) + (qualidade × 0.35) + (impacto × 0.30)
               </div>
